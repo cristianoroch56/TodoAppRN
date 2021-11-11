@@ -1,7 +1,12 @@
 /* eslint-disable prettier/prettier */
 import { createAppContainer } from 'react-navigation';
 import { createStackNavigator } from 'react-navigation-stack';
-import { AddSubTodoListScreen, HomeScreen, TodoListScreen } from '../screens';
+import {
+  AddSubTodoListScreen,
+  AddTodoListScreen,
+  HomeScreen,
+  TodoListScreen,
+} from '../screens';
 
 export default createAppContainer(
   createStackNavigator(
@@ -16,6 +21,10 @@ export default createAppContainer(
       },
       AddSubTodoListScreen: {
         screen: AddSubTodoListScreen,
+        navigationOptions: ({ navigation }) => ({ header: null }),
+      },
+      AddTodoListScreen: {
+        screen: AddTodoListScreen,
         navigationOptions: ({ navigation }) => ({ header: null }),
       },
     },

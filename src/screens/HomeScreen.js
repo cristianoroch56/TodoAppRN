@@ -71,7 +71,7 @@ class HomeScreen extends Component {
         </ScrollView>
         <TouchableOpacity
           style={StylesHomeScreen.fabStyle}
-          onPress={() => this.props.navigation.navigate('TodoListScreen')}
+          onPress={() => this.props.navigation.navigate('AddTodoListScreen')}
         >
           <Text style={StylesHomeScreen.fabStyleText}>+</Text>
         </TouchableOpacity>
