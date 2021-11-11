@@ -12,11 +12,14 @@ import {
 } from 'react-native';
 import { MyToolbar } from '../components';
 import Colors from '../constants/Colors';
+import { fireSnackBar } from '../constants/Utils';
+import store from '../database/TodoListStore';
 import { StylesHomeScreen } from '../stylesheets';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
+import { insertSubTodo } from '../database/TodoListLocalStore';
 
 class AddSubTodoListScreen extends Component {
   constructor(props) {
@@ -33,6 +36,42 @@ class AddSubTodoListScreen extends Component {
 
   componentDidMount() {
     const { navigation } = this.props;
+    const todoItemName = this.props.navigation.state.params.todoItemName;
+    console.log('todoItemName222', todoItemName);
+    this.setState({ todoItemName });
+  }
+
+  async addItem() {
+    const { todoItemName } = this.state;
+    console.log('todoItemName', todoItemName);
+    Keyboard.dismiss();
+    if (this.state.newItem === '') {
+      fireSnackBar('Please Add Todo Name');
+    } else {
+      const element = {
+        name: this.state.newItem,
+        categoryName: todoItemName,
+      };
+      insertSubTodo(element)
+        .then(async () => {
+          console.log('insertSubTodo', 'SUCCESSFULLY');
+          await store.addSubListItem(todoItemName, this.state.newItem);
+          fireSnackBar('List successfully added');
+          this.setState({
+            newItem: '',
+          });
+        })
+        .catch((error) => {
+          // alert(`Insert new todoList error ${error}`);
+          console.log(`insertSubTodo error ${error}`);
+        });
+    }
+  }
+
+  updateNewItem(text) {
+    this.setState({
+      newItem: text,
+    });
   }
 
   _onRefresh = () => {
@@ -87,11 +126,11 @@ class AddSubTodoListScreen extends Component {
             <View style={{ flexDirection: 'row' }}>
               <TextInput
                 value={this.state.newItem}
-                onChangeText={(text) => console.log(text)}
+                onChangeText={(text) => this.updateNewItem(text)}
                 style={styles.input}
               />
               <TouchableOpacity
-                onPress={() => console.log('Add Pressed')}
+                onPress={() => this.addItem()}
                 style={styles.button}
               >
                 <Text>Add</Text>

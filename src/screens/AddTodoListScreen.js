@@ -13,11 +13,13 @@ import {
 import { MyToolbar } from '../components';
 import Colors from '../constants/Colors';
 import { fireSnackBar } from '../constants/Utils';
+import store from '../database/TodoListStore';
 import { StylesHomeScreen } from '../stylesheets';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
+import { insertTodo } from '../database/TodoListLocalStore';
 
 class AddTodoListScreen extends Component {
   constructor(props) {
@@ -29,6 +31,30 @@ class AddTodoListScreen extends Component {
       isLoading: false,
       newItem: '',
     };
+  }
+
+  async addItem() {
+    Keyboard.dismiss();
+    if (this.state.newItem === '') {
+      fireSnackBar('Please Add Todo Name');
+    } else {
+      const element = {
+        name: this.state.newItem,
+      };
+      insertTodo(element)
+        .then(async () => {
+          console.log('insertTodo', 'SUCCESSFULLY');
+          await store.addItem(this.state.newItem);
+          fireSnackBar('List successfully added');
+          this.setState({
+            newItem: '',
+          });
+        })
+        .catch((error) => {
+          // alert(`Insert new todoList error ${error}`);
+          console.log(`insertTodo error ${error}`);
+        });
+    }
   }
 
   updateNewItem(text) {
@@ -101,7 +127,7 @@ class AddTodoListScreen extends Component {
                 style={styles.input}
               />
               <TouchableOpacity
-                onPress={() => console.log('Add Button Pressed')}
+                onPress={() => this.addItem()}
                 style={styles.button}
               >
                 <Text>Add</Text>

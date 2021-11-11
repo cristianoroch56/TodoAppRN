@@ -11,8 +11,11 @@ import {
 } from 'react-native';
 import { MyToolbar } from '../components';
 import Colors from '../constants/Colors';
+import { isEmpty } from '../constants/Utils';
+import store from '../database/TodoListStore';
 import { normalize, StylesHomeScreen } from '../stylesheets';
 import { observer } from 'mobx-react';
+import { deleteSubTodoList } from '../database/TodoListLocalStore';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
@@ -32,6 +35,8 @@ class TodoListScreen extends Component {
 
   async componentDidMount() {
     const { navigation } = this.props;
+    const todoItemName = this.props.navigation.state.params.item;
+    this.setState({ todoItemName });
     this.focusListener = navigation.addListener('didFocus', () => {
       this.setState({ isLoading: true }, () => {
         this.setState({ isLoading: false });
@@ -54,6 +59,16 @@ class TodoListScreen extends Component {
     });
   }
 
+  removeListItem(name) {
+    deleteSubTodoList(name)
+      .then(() => {
+        store.removeSubListItem(name);
+      })
+      .catch((error) => {
+        console.log(`deleteTodoList error ${error}`);
+      });
+  }
+
   render() {
     const { isLoading, todoItemName } = this.state;
     return (
@@ -69,9 +84,11 @@ class TodoListScreen extends Component {
           leftImage={require('../assets/images/ic_left_arrow.png')}
           onLeftImagePress={() => this.props.navigation.goBack(null)}
         />
-        <View style={styles.heading}>
-          <Text style={styles.headingText}>ToDo List Name</Text>
-        </View>
+        {!isEmpty(todoItemName) && (
+          <View style={styles.heading}>
+            <Text style={styles.headingText}>{todoItemName}</Text>
+          </View>
+        )}
         <ScrollView
           style={{ marginTop: hp('11%') }}
           refreshControl={
@@ -81,13 +98,33 @@ class TodoListScreen extends Component {
             />
           }
         >
-          <View style={StylesHomeScreen.noDataStyle}>
-            {!isLoading && (
-              <Text style={StylesHomeScreen.noDataAvailable}>
-                {'No Todo List Available'}
-              </Text>
-            )}
-          </View>
+          {store.getFilterSubTodoList(todoItemName).length > 0 ? (
+            <View style={[StylesHomeScreen.viewRvStyle]}>
+              {store.getFilterSubTodoList(todoItemName).map((item, i) => {
+                return (
+                  <View key={i} style={StylesHomeScreen.itemContainer}>
+                    <Text style={StylesHomeScreen.item}>
+                      {item.name.toUpperCase()}
+                    </Text>
+                    <Text
+                      style={StylesHomeScreen.deleteItem}
+                      onPress={() => this.removeListItem(item.name)}
+                    >
+                      Remove
+                    </Text>
+                  </View>
+                );
+              })}
+            </View>
+          ) : (
+            <View style={StylesHomeScreen.noDataStyle}>
+              {!isLoading && (
+                <Text style={StylesHomeScreen.noDataAvailable}>
+                  {'No Todo List Available'}
+                </Text>
+              )}
+            </View>
+          )}
         </ScrollView>
         <TouchableOpacity
           style={StylesHomeScreen.fabStyle}
