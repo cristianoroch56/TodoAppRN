@@ -7,36 +7,32 @@ import {
   StatusBar,
   ScrollView,
   RefreshControl,
-  ActivityIndicator,
+  Keyboard,
+  TextInput,
 } from 'react-native';
 import { MyToolbar } from '../components';
 import Colors from '../constants/Colors';
-import { normalize, StylesHomeScreen } from '../stylesheets';
-import { observer } from 'mobx-react';
+import { StylesHomeScreen } from '../stylesheets';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 
-@observer
-class TodoListScreen extends Component {
+class AddSubTodoListScreen extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
+      todoLists: [],
       refreshing: false,
       isLoading: false,
+      newItem: '',
       todoItemName: '',
     };
   }
 
-  async componentDidMount() {
+  componentDidMount() {
     const { navigation } = this.props;
-    this.focusListener = navigation.addListener('didFocus', () => {
-      this.setState({ isLoading: true }, () => {
-        this.setState({ isLoading: false });
-      });
-    });
   }
 
   _onRefresh = () => {
@@ -55,7 +51,7 @@ class TodoListScreen extends Component {
   }
 
   render() {
-    const { isLoading, todoItemName } = this.state;
+    const { isLoading, todoLists } = this.state;
     return (
       <View style={StylesHomeScreen.container}>
         <StatusBar
@@ -65,15 +61,12 @@ class TodoListScreen extends Component {
           barStyle='dark-content'
         />
         <MyToolbar
-          titleName={'Todo List'}
+          titleName={'Add Sub Todo List'}
           leftImage={require('../assets/images/ic_left_arrow.png')}
           onLeftImagePress={() => this.props.navigation.goBack(null)}
         />
-        <View style={styles.heading}>
-          <Text style={styles.headingText}>ToDo List Name</Text>
-        </View>
         <ScrollView
-          style={{ marginTop: hp('11%') }}
+          keyboardShouldPersistTaps='always'
           refreshControl={
             <RefreshControl
               refreshing={this.state.refreshing}
@@ -81,38 +74,36 @@ class TodoListScreen extends Component {
             />
           }
         >
-          <View style={StylesHomeScreen.noDataStyle}>
-            {!isLoading && (
-              <Text style={StylesHomeScreen.noDataAvailable}>
-                {'No Todo List Available'}
-              </Text>
-            )}
+          <View
+            style={{
+              flex: 1,
+              height: hp('80%'),
+              width: wp('100%'),
+              alignContent: 'center',
+              alignSelf: 'center',
+              alignItems: 'center',
+            }}
+          >
+            <View style={{ flexDirection: 'row' }}>
+              <TextInput
+                value={this.state.newItem}
+                onChangeText={(text) => console.log(text)}
+                style={styles.input}
+              />
+              <TouchableOpacity
+                onPress={() => console.log('Add Pressed')}
+                style={styles.button}
+              >
+                <Text>Add</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </ScrollView>
-        <TouchableOpacity
-          style={StylesHomeScreen.fabStyle}
-          onPress={() =>
-            this.props.navigation.navigate('AddSubTodoListScreen', {
-              todoItemName,
-            })
-          }
-        >
-          <Text style={StylesHomeScreen.fabStyleText}>+</Text>
-        </TouchableOpacity>
-
-        {isLoading && (
-          <ActivityIndicator
-            color={Colors.LightBlueColor}
-            animating={isLoading}
-            size={'large'}
-            style={StylesHomeScreen.loaderViewStyle}
-          />
-        )}
       </View>
     );
   }
 }
-export { TodoListScreen };
+export { AddSubTodoListScreen };
 
 const styles = StyleSheet.create({
   container: {
@@ -121,18 +112,34 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   heading: {
-    height: hp('10%'),
+    height: 80,
     justifyContent: 'center',
     alignItems: 'center',
     borderBottomWidth: 1,
     borderBottomColor: Colors.LightBlueColor,
-    position: 'absolute',
-    top: hp('10%'),
-    width: wp('100%'),
   },
   headingText: {
     color: Colors.LightBlueColor,
     fontWeight: 'bold',
-    fontSize: normalize(15),
+  },
+  input: {
+    height: 70,
+    backgroundColor: '#ededed',
+    padding: 20,
+    flex: 1,
+  },
+  button: {
+    width: 70,
+    height: 70,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderTopWidth: 1,
+    borderColor: '#ededed',
+  },
+
+  noItem: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
