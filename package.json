@@ -25,8 +25,13 @@
     "react-navigation-stack": "^2.10.4",
     "react-navigation-tabs": "^2.11.1",
     "realm": "^10.9.1",
+    "moment": "^2.29.1",
     "@babel/plugin-proposal-class-properties": "^7.14.5",
-    "@babel/plugin-transform-flow-strip-types": "^7.14.5"
+    "@babel/plugin-transform-flow-strip-types": "^7.14.5",
+    "react-native-draggable-dynamic-flatlist": "^1.0.4",
+    "react-native-draggable-flatlist": "^2.6.2",
+    "react-native-elements": "^3.4.2",
+    "react-native-modal-datetime-picker": "^13.0.0"
   },
   "devDependencies": {
     "@babel/core": "7.16.0",

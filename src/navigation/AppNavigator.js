@@ -1,11 +1,11 @@
 /* eslint-disable prettier/prettier */
-import { createAppContainer } from 'react-navigation';
-import { createStackNavigator } from 'react-navigation-stack';
+import {createAppContainer} from 'react-navigation';
+import {createStackNavigator} from 'react-navigation-stack';
 import {
-  AddSubTodoListScreen,
-  AddTodoListScreen,
   HomeScreen,
   TodoListScreen,
+  AddTodoListScreen,
+  AddSubTodoListScreen,
 } from '../screens';
 
 export default createAppContainer(
@@ -13,19 +13,28 @@ export default createAppContainer(
     {
       HomeScreen: {
         screen: HomeScreen,
-        navigationOptions: ({ navigation }) => ({ header: null }),
+        //navigationOptions: ({navigation}) => ({header: false}),
+        navigationOptions: {
+          headerShown: false,
+        },
       },
       TodoListScreen: {
         screen: TodoListScreen,
-        navigationOptions: ({ navigation }) => ({ header: null }),
-      },
-      AddSubTodoListScreen: {
-        screen: AddSubTodoListScreen,
-        navigationOptions: ({ navigation }) => ({ header: null }),
+        navigationOptions: {
+          headerShown: false,
+        },
       },
       AddTodoListScreen: {
         screen: AddTodoListScreen,
-        navigationOptions: ({ navigation }) => ({ header: null }),
+        navigationOptions: {
+          headerShown: false,
+        },
+      },
+      AddSubTodoListScreen: {
+        screen: AddSubTodoListScreen,
+        navigationOptions: {
+          headerShown: false,
+        },
       },
     },
     {
@@ -33,6 +42,6 @@ export default createAppContainer(
       defaultNavigationOptions: {
         gestureEnabled: false,
       },
-    }
-  )
+    },
+  ),
 );

@@ -1,5 +1,6 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import {
+  SafeAreaView,
   View,
   Text,
   StyleSheet,
@@ -9,17 +10,18 @@ import {
   RefreshControl,
   Keyboard,
   TextInput,
+  Image,
 } from 'react-native';
-import { MyToolbar } from '../components';
+import {MyToolbar} from '../components';
 import Colors from '../constants/Colors';
-import { fireSnackBar } from '../constants/Utils';
+import {fireSnackBar} from '../constants/Utils';
 import store from '../database/TodoListStore';
-import { StylesHomeScreen } from '../stylesheets';
+import {normalize, StylesHomeScreen} from '../stylesheets';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
-import { insertTodo } from '../database/TodoListLocalStore';
+import {insertTodo} from '../database/TodoListLocalStore';
 
 class AddTodoListScreen extends Component {
   constructor(props) {
@@ -50,7 +52,7 @@ class AddTodoListScreen extends Component {
             newItem: '',
           });
         })
-        .catch((error) => {
+        .catch(error => {
           // alert(`Insert new todoList error ${error}`);
           console.log(`insertTodo error ${error}`);
         });
@@ -64,7 +66,7 @@ class AddTodoListScreen extends Component {
   }
 
   componentDidMount() {
-    const { navigation } = this.props;
+    const {navigation} = this.props;
 
     // this.focusListener = navigation.addListener('didFocus', () => {
 
@@ -72,10 +74,10 @@ class AddTodoListScreen extends Component {
   }
 
   _onRefresh = () => {
-    this.setState({ refreshing: true });
+    this.setState({refreshing: true});
     // setup function call to get todo lists
     setTimeout(() => {
-      this.setState({ refreshing: false });
+      this.setState({refreshing: false});
     }, 800);
   };
 
@@ -87,29 +89,27 @@ class AddTodoListScreen extends Component {
   }
 
   render() {
-    const { isLoading, todoLists } = this.state;
+    const {isLoading, todoLists} = this.state;
     return (
-      <View style={StylesHomeScreen.container}>
+      <SafeAreaView style={StylesHomeScreen.container}>
         <StatusBar
-          hidden={false}
-          backgroundColor={'transparent'}
-          translucent
-          barStyle='dark-content'
+          barStyle="dark-content"
+          backgroundColor={Colors.WhiteColor}
         />
         <MyToolbar
+          onLeftImagePress={() => this.props.navigation.goBack()}
           titleName={'Add Todo List'}
-          leftImage={require('../assets/images/ic_left_arrow.png')}
-          onLeftImagePress={() => this.props.navigation.goBack(null)}
+          imageLeftStyle={{tintColor: Colors.BlueColor}}
+          leftImage={require('../assets/icons/ic_back_white.png')}
         />
         <ScrollView
-          keyboardShouldPersistTaps='always'
+          keyboardShouldPersistTaps="always"
           refreshControl={
             <RefreshControl
               refreshing={this.state.refreshing}
               onRefresh={this._onRefresh}
             />
-          }
-        >
+          }>
           <View
             style={{
               flex: 1,
@@ -118,31 +118,35 @@ class AddTodoListScreen extends Component {
               alignContent: 'center',
               alignSelf: 'center',
               alignItems: 'center',
-            }}
-          >
-            <View style={{ flexDirection: 'row' }}>
+            }}>
+            <View style={styles.textInputContainer}>
               <TextInput
                 value={this.state.newItem}
-                onChangeText={(text) => this.updateNewItem(text)}
-                style={styles.input}
+                onChangeText={text => this.updateNewItem(text)}
+                style={styles.textInputStyle}
+                placeholder={'Enter a todos'}
+                returnKeyType={'go'}
+                onSubmitEditing={() => this.addItem()}
               />
               <TouchableOpacity
                 onPress={() => this.addItem()}
-                style={styles.button}
-              >
-                <Text>Add</Text>
+                style={{
+                  alignSelf: 'center',
+                  padding: wp('3.5%'),
+                }}>
+                <Image
+                  source={require('../assets/icons/ic_add.png')}
+                  style={{width: wp('6.5%'), height: wp('6.5%')}}
+                />
               </TouchableOpacity>
             </View>
           </View>
         </ScrollView>
-        {/* <TouchableOpacity style={StylesHomeScreen.fabStyle}>
-          <Text style={StylesHomeScreen.fabStyleText}>+</Text>
-        </TouchableOpacity> */}
-      </View>
+      </SafeAreaView>
     );
   }
 }
-export { AddTodoListScreen };
+export {AddTodoListScreen};
 
 const styles = StyleSheet.create({
   container: {
@@ -174,5 +178,34 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderTopWidth: 1,
     borderColor: '#ededed',
+  },
+  noItem: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  textInputStyle: {
+    marginLeft: wp('2%'),
+    flex: 1,
+    flexDirection: 'row',
+    fontFamily: 'OpenSans-Medium',
+    fontSize: normalize(12.5),
+    color: Colors.BlackColor,
+    borderRadius: wp('1%'),
+    borderWidth: wp('0.23%'),
+    borderColor: Colors.GreyColor,
+    minHeight: hp('6%'),
+    maxHeight: hp('15%'),
+  },
+  textAddStyle: {
+    fontFamily: 'OpenSans-Medium',
+    fontSize: normalize(13),
+    color: Colors.BlueColor,
+  },
+  textInputContainer: {
+    flexDirection: 'row',
+    width: wp('100%'),
+    backgroundColor: '#ededed',
+    paddingVertical: hp('1%'),
   },
 });

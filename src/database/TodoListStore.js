@@ -18,11 +18,30 @@ class TodoListStore {
     makeAutoObservable(this);
   }
 
-  @action addSubListItem = async (categoryName, item) => {
+  @action addSubListItem = async (
+    categoryName,
+    item,
+    isDone,
+    tag,
+    isImportant,
+    dob,
+  ) => {
     this.subTodoList.push({
       name: item,
       categoryName: categoryName,
+      isCompleted: isDone,
+      tag: tag,
+      isImportant: isImportant,
+      dob: dob,
     });
+  };
+
+  @action storeCompleteSubList = async name => {
+    const index = this.subTodoList.findIndex(item => item.name == name);
+    const status = this.subTodoList[index].isCompleted;
+    console.log('index', index, JSON.stringify(this.subTodoList));
+    this.subTodoList[index].isCompleted = !status;
+    console.log('index after', index, JSON.stringify(this.subTodoList));
   };
 
   @action addItem = async item => {
@@ -59,11 +78,6 @@ class TodoListStore {
   //To get Todo value
   @computed get getTodoList() {
     return this.todoLists;
-  }
-
-  //To get Todo value
-  @computed get getSubTodoList() {
-    return this.subTodoList;
   }
 }
 const store = new TodoListStore();

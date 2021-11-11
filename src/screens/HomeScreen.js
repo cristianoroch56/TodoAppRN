@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import {
   View,
   Text,
@@ -6,27 +6,26 @@ import {
   StatusBar,
   ScrollView,
   TouchableOpacity,
-  Icon,
+  FlatList,
+  Image,
+  SafeAreaView,
 } from 'react-native';
 import Snackbar from 'react-native-snackbar';
 import Colors from '../constants/Colors';
-import { StylesHomeScreen } from '../stylesheets';
+import {StylesHomeScreen} from '../stylesheets';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
-import { MyToolbar } from '../components';
+import {MyToolbar} from '../components';
 import store from '../database/TodoListStore';
-import { observer } from 'mobx-react';
+import {observer} from 'mobx-react';
 import {
   deleteTodoList,
   queryAllTodoLists,
 } from '../database/TodoListLocalStore';
-import {
-  TouchableHighlight,
-  TouchableWithoutFeedback,
-} from 'react-native-gesture-handler';
-
+import DraggableFlatList from 'react-native-draggable-dynamic-flatlist';
+import {isEmpty} from '../constants/Utils';
 @observer
 class HomeScreen extends Component {
   constructor(props) {
@@ -37,21 +36,24 @@ class HomeScreen extends Component {
       isLoading: false,
       text: '',
       showInput: false,
+      todoList: [],
     };
   }
 
   componentDidMount() {
-    const { navigation } = this.props;
+    const {navigation} = this.props;
+    this.setState({todoList: store.getTodoList});
     this.focusListener = navigation.addListener('didFocus', () => {
+      this.setState({todoList: store.getTodoList});
       //this.startAnimationMove();
     });
   }
 
   _onRefresh = () => {
-    this.setState({ refreshing: true });
+    this.setState({refreshing: true});
     // setup function call to get todo lists
     setTimeout(() => {
-      this.setState({ refreshing: false });
+      this.setState({refreshing: false});
     }, 800);
   };
 
@@ -65,74 +67,103 @@ class HomeScreen extends Component {
   removeListItem(item) {
     deleteTodoList(item)
       .then(() => {
+        const tempData = this.state.todoList.filter(list => list.name != item);
+
+        this.setState({todoList: tempData});
         store.removeListItem(item);
       })
-      .catch((error) => {
+      .catch(error => {
         console.log(`deleteTodoList error ${error}`);
       });
   }
 
   async redirectToTodoScreen(item) {
     await store.setCategoryName(item);
-    this.props.navigation.navigate('TodoListScreen', { item });
+    this.props.navigation.navigate('TodoListScreen', {item});
+  }
+
+  renderUpdateItem = ({item, i, move, moveEnd, isActive}) => {
+    return (
+      <TouchableOpacity
+        style={StylesHomeScreen.itemContainer}
+        onLongPress={move}
+        onPressOut={moveEnd}>
+        <Text style={StylesHomeScreen.item}>{item.name}</Text>
+        <TouchableOpacity
+          style={StylesHomeScreen.deleteItem}
+          onPress={() => this.removeListItem(item.name)}>
+          <Image
+            source={require('../assets/icons/ic_delete.png')}
+            style={{width: wp('6.5%'), height: wp('6.5%')}}
+          />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={StylesHomeScreen.deleteItem}
+          onPress={() => this.redirectToTodoScreen(item.name)}>
+          <Image
+            source={require('../assets/icons/ic_next.png')}
+            style={{width: wp('6.5%'), height: wp('6.5%')}}
+          />
+        </TouchableOpacity>
+      </TouchableOpacity>
+    );
+  };
+
+  updateTodoList(data) {
+    this.setState({todoList: data});
   }
 
   render() {
-    const { isLoading } = this.state;
+    const {todoList} = this.state;
     return (
-      <View style={StylesHomeScreen.container}>
+      <SafeAreaView style={StylesHomeScreen.container}>
         <StatusBar
-          hidden={false}
-          backgroundColor={'transparent'}
-          translucent
-          barStyle='dark-content'
+          barStyle="dark-content"
+          backgroundColor={Colors.WhiteColor}
         />
         <MyToolbar titleName={'Todo List'} />
-        <ScrollView
-          refreshControl={
-            <RefreshControl
-              refreshing={this.state.refreshing}
-              onRefresh={this._onRefresh}
+
+        {this.state.todoList.length > 0 ? (
+          <View style={StylesHomeScreen.viewRvStyle}>
+            <DraggableFlatList
+              data={this.state.todoList}
+              renderItem={this.renderUpdateItem}
+              keyExtractor={(item, index) => `draggable-item-${item.name}`}
+              scrollPercent={5}
+              onMoveEnd={({data}) => this.updateTodoList(data)}
             />
-          }
-        >
-          {store.getTodoList.length > 0 ? (
-            <View style={StylesHomeScreen.viewRvStyle}>
-              {store.getTodoList.map((item, i) => {
-                return (
-                  <View key={i} style={StylesHomeScreen.itemContainer}>
-                    <Text
-                      style={StylesHomeScreen.item}
-                      onPress={() => this.redirectToTodoScreen(item.name)}
-                    >
-                      {item.name.toUpperCase()}
-                    </Text>
-                    <Text
-                      style={StylesHomeScreen.deleteItem}
-                      onPress={() => this.removeListItem(item.name)}
-                    >
-                      Remove
-                    </Text>
-                  </View>
-                );
-              })}
-            </View>
-          ) : (
+          </View>
+        ) : (
+          <ScrollView
+            refreshControl={
+              <RefreshControl
+                refreshing={this.state.refreshing}
+                onRefresh={this._onRefresh}
+              />
+            }>
             <View style={StylesHomeScreen.noDataStyle}>
               <Text style={StylesHomeScreen.noDataAvailable}>
                 {'No Todo List Available'}
               </Text>
             </View>
-          )}
-        </ScrollView>
-        <TouchableOpacity
-          style={StylesHomeScreen.fabStyle}
-          onPress={() => this.props.navigation.navigate('AddTodoListScreen')}
-        >
-          <Text style={StylesHomeScreen.fabStyleText}>+</Text>
-        </TouchableOpacity>
-      </View>
+          </ScrollView>
+        )}
+
+        <View style={StylesHomeScreen.containerFabStyle}>
+          <TouchableOpacity
+            style={StylesHomeScreen.IconContianer}
+            onPress={() => this.props.navigation.navigate('AddTodoListScreen')}>
+            <Image
+              source={require('../assets/icons/ic_tab_blue.png')}
+              style={{width: wp('6.5%'), height: wp('6.5%')}}
+            />
+            <Text style={StylesHomeScreen.newReminderTextStyle}>
+              New Reminder
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
     );
   }
 }
-export { HomeScreen };
+export {HomeScreen};

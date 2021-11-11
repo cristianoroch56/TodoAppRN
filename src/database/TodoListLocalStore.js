@@ -15,6 +15,10 @@ export const SubToDoList = {
   properties: {
     name: 'string?',
     categoryName: 'string?',
+    isCompleted: 'bool',
+    tag: 'string?',
+    isImportant: 'bool',
+    dob: 'string?',
   },
 };
 
@@ -43,6 +47,28 @@ export const insertSubTodo = newTodoValue =>
         realm.write(() => {
           realm.create(SUB_TO_DO_LIST, newTodoValue);
           resolve(newTodoValue);
+        });
+      })
+      .catch(error => reject(error));
+  });
+
+export const updateSubTodo = element =>
+  new Promise((resolve, reject) => {
+    Realm.open(databaseOptions)
+      .then(realm => {
+        let allSubTodoLists = realm.objects(SUB_TO_DO_LIST);
+        realm.write(() => {
+          const index = allSubTodoLists.findIndex(
+            item => item.name == element.name,
+          );
+          console.log('index@@@', index, '__', element);
+          allSubTodoLists[index].name = element.name;
+          allSubTodoLists[index].categoryName = element.categoryName;
+          allSubTodoLists[index].isCompleted = element.isCompleted;
+          allSubTodoLists[index].tag = element.tag;
+          allSubTodoLists[index].isImportant = element.isImportant;
+          allSubTodoLists[index].dob = element.dob;
+          resolve(allSubTodoLists);
         });
       })
       .catch(error => reject(error));

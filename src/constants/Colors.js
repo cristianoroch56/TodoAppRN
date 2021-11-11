@@ -4,4 +4,7 @@ export default {
   AccentColor: '#3ecdd1',
   WhiteColor: '#ffffff',
   LightBlueColor: '#156e9a',
+  BlueColor: '#008bf9',
+  GreyColor: '#828282',
+  BlackColor: '#000000',
 };
